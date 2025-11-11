@@ -1,26 +1,28 @@
+import html2pdf from 'html2pdf.js';
 import { ManagerialCharter } from '@/types/charter';
 
-export const generatePDF = async (charter: ManagerialCharter): Promise<void> => {
-  // Import html2pdf dynamically
-  const html2pdf = (await import('html2pdf.js')).default;
-  
+export const generatePDF = async (charter: ManagerialCharter) => {
   const element = document.getElementById('charter-summary');
-  if (!element) {
-    throw new Error('Élément de synthèse non trouvé');
-  }
-
-  const opt = {
-    margin: 1,
-    filename: 'ma-charte-manageriale.pdf',
+  
+  const options = {
+    margin: 10,
+    filename: `charte-manageriale-${new Date().toISOString().split('T')[0]}.pdf`,
     image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2 },
-    jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+    html2canvas: { 
+      scale: 2,
+      useCORS: true,
+      letterRendering: true
+    },
+    jsPDF: { 
+      unit: 'mm', 
+      format: 'a4', 
+      orientation: 'portrait' 
+    },
+    pagebreak: { 
+      mode: 'avoid-all',
+      avoid: '.print\\:break-inside-avoid'
+    }
   };
 
-  try {
-    await html2pdf().set(opt).from(element).save();
-  } catch (error) {
-    console.error('Erreur lors de la génération du PDF:', error);
-    throw new Error('Impossible de générer le PDF');
-  }
+  return html2pdf().set(options).from(element).save();
 };
